@@ -516,7 +516,6 @@ class MyHTTPServer:
         lines = request.split(&quot;\r\n&quot;)
         method, url, protocol = lines[0].split(&quot; &quot;)
 
-        print(lines)
         headers = {}
         body = ''
         i = 1
@@ -541,7 +540,20 @@ class MyHTTPServer:
             response_body = response_body[:len(response_body)-1]
             response_body += &quot;&lt;/li&gt;&quot;
 
-        response_body += &quot;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;&quot;
+        response_body += &quot;&lt;/ul&gt;&quot;
+
+        response_body += &quot;&quot;&quot;
+                &lt;h2&gt;Добавить новую оценку&lt;/h2&gt;
+                &lt;form method=&quot;POST&quot; action=&quot;/&quot;&gt;
+                    &lt;label for=&quot;discipline&quot;&gt;Дисциплина:&lt;/label&gt;&lt;br&gt;
+                    &lt;input type=&quot;text&quot; id=&quot;discipline&quot; name=&quot;discipline&quot;&gt;&lt;br&gt;
+                    &lt;label for=&quot;grade&quot;&gt;Оценка:&lt;/label&gt;&lt;br&gt;
+                    &lt;input type=&quot;text&quot; id=&quot;grade&quot; name=&quot;grade&quot;&gt;&lt;br&gt;&lt;br&gt;
+                    &lt;input type=&quot;submit&quot; value=&quot;Добавить&quot;&gt;
+                &lt;/form&gt;
+                &quot;&quot;&quot;
+
+        response_body += &quot;&lt;/body&gt;&lt;/html&gt;&quot;
 
         self.send_response(client_socket, &quot;200 OK&quot;, response_body)
 
@@ -560,9 +572,10 @@ class MyHTTPServer:
                 self.grades[discipline].append(grade)
             else:
                 self.grades[discipline] = [grade]
-            self.send_response(client_socket, &quot;200 OK&quot;, &quot;Данные добавлены!&quot;)
+            self.handle_get(client_socket)
         else:
-            self.send_response(client_socket, &quot;400 Bad Request&quot;, &quot;Неверный запрос!&quot;)
+            self.send_response(client_socket, &quot;400 Bad Request&quot;, &quot;&lt;html&gt;&lt;body&gt;&lt;h1&gt;Неверный запрос!&lt;/h1&gt;&lt;a &quot;
+                                                                 &quot;href='/'&gt;Назад&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;&quot;)
 
     def send_response(self, client_socket, status, body):
         response = f&quot;HTTP/1.1 {status}\r\n&quot;
@@ -578,6 +591,7 @@ class MyHTTPServer:
 if __name__ == '__main__':
     server = MyHTTPServer(host='127.0.0.1', port=8090)
     server.serve_forever()
+
 </code></pre>
 <p>Сервер создает сокет, работающий по протоколу TCP и ожидает запроса от клиента. Клиент направляет запрос GET или POST. Запрос парсится (считываются заголовки и тело), далее направляется в соответствующий хэндлер.</p>
 <p>При POST-запросе считываются параметры дисциплины и оценки и добавляются в словарь успеваемости. При GET-запросе составляется html ответ, содержащий каждую дисциплину со всеми сохраненными оценками.</p>
